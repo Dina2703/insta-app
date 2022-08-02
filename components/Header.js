@@ -45,7 +45,7 @@ function Header() {
           <PlusCircleIcon className="h-6 cursor-pointer hover:scale-125 transition-transform duration-200 ease-out" />
           <picture>
             <img
-              src="avatar.jpeg"
+              src="/avatar.jpeg"
               alt="avatar"
               className="h-10 rounded-full cursor-pointer"
             />
