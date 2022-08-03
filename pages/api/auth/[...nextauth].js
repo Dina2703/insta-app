@@ -13,4 +13,16 @@ export default NextAuth({
   pages: {
     signIn: "/auth/signin",
   },
+
+  callbacks: {
+    async session({ session, token }) {
+      //create a username for the user from  'name' property, join the name and make it lowerCase.
+      session.user.username = session.user.name
+        .split(" ")
+        .join("")
+        .toLocaleLowerCase();
+      session.user.uid = token.sub;
+      return session;
+    },
+  },
 });
