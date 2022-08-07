@@ -16,7 +16,7 @@ function Stories() {
       id: index,
     }));
     setStoryUsers(storyUsers);
-    console.log(storyUsers);
+    // console.log(storyUsers);
   }, []);
   return (
     <div
