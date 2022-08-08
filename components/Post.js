@@ -6,8 +6,7 @@ import {
   EmojiHappyIcon,
 } from "@heroicons/react/outline";
 
-function Post({ post }) {
-  const { id, username, userImg, img, caption } = post;
+function Post({ id, username, userImg, img, caption }) {
   return (
     <div className="bg-white my-7 border  rounded-md">
       {/*Post Header */}
