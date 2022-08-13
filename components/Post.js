@@ -7,12 +7,36 @@ import {
 } from "@heroicons/react/outline";
 import { db } from "../firebase";
 import { useSession } from "next-auth/react";
-import { useState } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { useState, useEffect } from "react";
+import {
+  addDoc,
+  collection,
+  onSnapshot,
+  orderBy,
+  serverTimestamp,
+  query,
+} from "firebase/firestore";
+
+import Moment from "react-moment";
+
 function Post({ id, username, userImg, img, caption }) {
   const [comment, setComment] = useState("");
+  const [comments, setComments] = useState([]);
   //get data from useSession and call it 'session'
   const { data: session } = useSession();
+
+  console.log(comments);
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      query(
+        collection(db, "posts", id, "comments"),
+        orderBy("timestamp", "desc")
+      ),
+      (snapshot) => {
+        setComments(snapshot.docs);
+      }
+    );
+  }, [id]);
 
   async function sendComment(e) {
     e.preventDefault();
@@ -63,6 +87,25 @@ function Post({ id, username, userImg, img, caption }) {
       <p className="p-5 truncate">
         <span className="font-bold mr-2">{username}</span> {caption}
       </p>
+      {comments.length > 0 && (
+        <div className="mx-10 max-h-24 overflow-y-scroll scrollbar-none">
+          {comments.map((comment) => (
+            <div className="flex items-center space-x-2 mb-2" key={comment.id}>
+              <picture>
+                <img
+                  className="h-7 rounded-full object-cover"
+                  src={comment.data().userImage}
+                  alt="user-image"
+                />
+              </picture>
+
+              <p className="font-semibold">{comment.data().username}</p>
+              <p className="flex-1 truncate">{comment.data().comment}</p>
+              <Moment fromNow>{comment.data().timestamp?.toDate()}</Moment>
+            </div>
+          ))}
+        </div>
+      )}
       {/*Post Input box*/}
       {session && (
         <form className="flex items-center p-4">
