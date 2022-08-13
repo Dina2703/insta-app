@@ -14,7 +14,7 @@ function Posts() {
       }
     );
     return unsubscribe;
-  }, [db]);
+  }, [posts]);
 
   return (
     <div>

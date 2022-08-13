@@ -5,6 +5,7 @@ import {
   BookmarkIcon,
   EmojiHappyIcon,
 } from "@heroicons/react/outline";
+import { HeartIcon as HeartIconFilled } from "@heroicons/react/solid";
 import { db } from "../firebase";
 import { useSession } from "next-auth/react";
 import { useState, useEffect } from "react";
@@ -15,6 +16,9 @@ import {
   orderBy,
   serverTimestamp,
   query,
+  setDoc,
+  doc,
+  deleteDoc,
 } from "firebase/firestore";
 
 import Moment from "react-moment";
@@ -22,6 +26,8 @@ import Moment from "react-moment";
 function Post({ id, username, userImg, img, caption }) {
   const [comment, setComment] = useState("");
   const [comments, setComments] = useState([]);
+  const [hasLiked, setHasLiked] = useState(false);
+  const [likes, setLikes] = useState([]);
   //get data from useSession and call it 'session'
   const { data: session } = useSession();
 
@@ -38,6 +44,19 @@ function Post({ id, username, userImg, img, caption }) {
     );
   }, [id]);
 
+  useEffect(() => {
+    const unsubscribe = onSnapshot(
+      collection(db, "posts", id, "likes"),
+      (snapshot) => setLikes(snapshot.docs)
+    );
+  }, [id]);
+
+  useEffect(() => {
+    setHasLiked(
+      likes.findIndex((like) => like.id === session?.user.uid) !== -1
+    );
+  }, [likes, session.user.uid]);
+
   async function sendComment(e) {
     e.preventDefault();
     const commentToSend = comment;
@@ -49,6 +68,17 @@ function Post({ id, username, userImg, img, caption }) {
       timestamp: serverTimestamp(),
     });
   }
+
+  async function likePost() {
+    if (hasLiked) {
+      await deleteDoc(doc(db, "posts", id, "likes", session.user.uid));
+    } else {
+      await setDoc(doc(db, "posts", id, "likes", session.user.uid), {
+        username: session.user.username,
+      });
+    }
+  }
+
   return (
     <div className="bg-white my-7 border  rounded-md">
       {/*Post Header */}
@@ -76,7 +106,15 @@ function Post({ id, username, userImg, img, caption }) {
       {session && (
         <div className="flex justify-between px-4">
           <div className="flex space-x-4">
-            <HeartIcon className="btn" />
+            {hasLiked ? (
+              <HeartIconFilled
+                className="btn text-red-400"
+                onClick={likePost}
+              />
+            ) : (
+              <HeartIcon className="btn" onClick={likePost} />
+            )}
+
             <ChatIcon className="btn" />
           </div>
           <BookmarkIcon className=" btn" />
