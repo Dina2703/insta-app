@@ -40,16 +40,17 @@ export default function Post({ img, userImg, caption, username, id }) {
         setComments(snapshot.docs);
       }
     );
-  }, [db, id]);
+  }, [id]);
   useEffect(() => {
     const unsubscribe = onSnapshot(
       collection(db, "posts", id, "likes"),
       (snapshot) => setLikes(snapshot.docs)
     );
-  }, [db]);
+  }, [id]);
+
   useEffect(() => {
     setHasLiked(likes.findIndex((like) => like.id === currentUser?.uid) !== -1);
-  }, [likes]);
+  }, [likes, currentUser?.uid]);
   async function likePost() {
     if (hasLiked) {
       await deleteDoc(doc(db, "posts", id, "likes", currentUser?.uid));
@@ -125,16 +126,14 @@ export default function Post({ img, userImg, caption, username, id }) {
         <div className="mx-10 max-h-24 overflow-y-scroll scrollbar-none">
           {comments.map((comment) => (
             <div
-              key={comment.data().id}
+              key={comment.data().timestamp}
               className="flex items-center space-x-2 mb-2"
             >
-              <picture>
-                <img
-                  className="h-7  rounded-full object-cover"
-                  src={comment.data().userImage}
-                  alt="user-image"
-                />
-              </picture>
+              <img
+                className="h-7  rounded-full object-cover"
+                src={comment.data().userImage}
+                alt="user-image"
+              />
 
               <p className="font-semibold">{comment.data().username}</p>
               <p className="flex-1 truncate">{comment.data().comment}</p>
